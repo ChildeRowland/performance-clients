@@ -1,5 +1,5 @@
-// const startData = require('./data').startData;
-// const endData = require('./data').endData;
+// const startData = require('./data').testStartData;
+// const endData = require('./data').testEndData;
 
 const currentClientAndMarketers = require('./data').currentClientAndMarketers;
 const projectedClientAndMarketers = require('./data').projectedClientAndMarketers;
@@ -96,19 +96,19 @@ function marketersWithAllNewClients (s, e) {
 
 	const results = [];
 
-	Object.keys(s).forEach((sName) => {
+	Object.keys(e).forEach((eName) => {
 
-		for (let i = 0; i < s[sName].length; i++) {
+		for (let i = 0; i < e[eName].length; i++) {
 
-			let clientName = s[sName][i];
+			let clientName = e[eName][i];
 
-			if (e[sName] && e[sName].includes(clientName)) {
+			if (s[eName] && s[eName].includes(clientName)) {
 				return;
 			}
 
 		}
 
-		results.push(sName);
+		results.push(eName);
 
 	});
 
@@ -129,44 +129,37 @@ function clientsWithAllNewMarketers (s, e) {
 }
 
 // marketer is keeping a client, and can train a marketer to that client
-function marketerCanTrainNewMarketer (s, e) {
+function marketerCanTrainNewMarketer (current, projected) {
 
 	const results = [];
-	const marketer_with_same_clients = marketerKeepsClients(s, e);
-	const marketer_with_different_clients = marketerChangesClients(s, e);
 
-	//Object.keys(marketer_with_different_clients).forEach((traineeMarketerName) => {
-	Object.keys(marketer_with_same_clients).forEach((trainingMarketerName) => {
 
-		const mapObj = {};
+	Object.keys(projected).forEach((clientName) => {
 
-		// marketer_with_different_clients[traineeMarketerName].forEach((clientName) => {
-		marketer_with_same_clients[trainingMarketerName].forEach((clientName) => {
+		const mapObj = {
+			clientName: clientName,
+			trainers: [],
+			trainees: []
+		};
 
-			// Object.keys(marketer_with_same_clients).forEach((trainingMarketerName) => {
-			Object.keys(marketer_with_different_clients).forEach((traineeMarketerName) => {
+		projected[clientName].forEach((marketerName) => {
 
-				// if (marketer_with_same_clients[trainingMarketerName].includes(clientName)) {
-				if (marketer_with_different_clients[traineeMarketerName].includes(clientName)) {
+			if (current[clientName] && 
+				  current[clientName].includes(marketerName)) {
 
-					if (!mapObj.trainer) {
-						mapObj.trainer = trainingMarketerName;
-						mapObj.trainees = [];
-						mapObj.clientName = clientName;
-					}
+				mapObj.trainers.push(marketerName);
+				return;
 
-					mapObj.trainees.push(traineeMarketerName);
-					
-				}
+			}
 
-			});
+			mapObj.trainees.push(marketerName);
 
 		});
 
-		if (mapObj.trainer) {
+		if (mapObj.trainers.length > 0 && mapObj.trainees.length) {
 			results.push(mapObj);
 		}
-		
+
 	});
 
 	return results;
@@ -174,14 +167,14 @@ function marketerCanTrainNewMarketer (s, e) {
 }
 
 // formatted version of marketers who can train other marketers to a client
-function formattedMarketerCanTrainNewMarketer(s, e) {
+function formattedMarketerCanTrainNewMarketer(current, projected) {
 
 	const results = [];
-	const marketer_can_train_marketer_to_client = marketerCanTrainNewMarketer(s, e);
+	const marketer_can_train_marketer_to_client = marketerCanTrainNewMarketer(current, projected);
 
 	marketer_can_train_marketer_to_client.forEach((trainingObj) => {
 
-		results.push(`${trainingObj.trainer} can train ${trainingObj.trainees.join(', ')} on client ${trainingObj.clientName}`);
+		results.push(`${trainingObj.trainers.join(', ')} can train ${trainingObj.trainees.join(', ')} on client ${trainingObj.clientName}`);
 
 	});
 
@@ -215,37 +208,37 @@ const marketer_with_same_clients = marketerKeepsClients(startData, endData);
 console.log("*** Marketers keeping the same clients ***");
 console.log(marketer_with_same_clients);
 
-console.log("*********************************************");
+console.log("\n ********************************************* \n");
 
 const marketer_with_different_clients = marketerChangesClients(startData, endData);
 console.log("*** Marketers changing clients ***");
 console.log(marketer_with_different_clients);
 
-console.log("*********************************************");
+console.log("\n ********************************************* \n");
 
 const marketers_with_all_new_clients = marketersWithAllNewClients(startData, endData);
 console.log("*** Marketers with all new clients ***");
 console.log(marketers_with_all_new_clients);
 
-console.log("*********************************************");
+console.log("\n ********************************************* \n");
 
-const marketer_can_train_marketer_to_client = marketerCanTrainNewMarketer(startData, endData);
+const marketer_can_train_marketer_to_client = marketerCanTrainNewMarketer(currentClientAndMarketers, projectedClientAndMarketers);
 console.log("*** marketers who can train other marketer to a client ***");
 console.log(marketer_can_train_marketer_to_client);
 
-console.log("*********************************************");
+console.log("\n ********************************************* \n");
 
-const formated_marketer_can_train_marketer_to_client = formattedMarketerCanTrainNewMarketer(startData, endData);
+const formated_marketer_can_train_marketer_to_client = formattedMarketerCanTrainNewMarketer(currentClientAndMarketers, projectedClientAndMarketers);
 console.log("*** marketers who can train other marketer to a client (in string format) ***"); 
 console.log(formated_marketer_can_train_marketer_to_client);
 
-console.log("*********************************************");
+console.log("\n ********************************************* \n");
 
 const clients_with_all_new_marketers = clientsWithAllNewMarketers(startData, endData);
 console.log("*** Clients with all new marketers ***");
 console.log(clients_with_all_new_marketers);
 
-console.log("*********************************************");
+console.log("\n ********************************************* \n");
 
 
 
